@@ -23,6 +23,7 @@
           buildInputs = with pkgs; [
             just
             fasm
+            qemu
           ];
         };
       }
