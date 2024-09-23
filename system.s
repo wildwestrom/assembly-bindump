@@ -1,4 +1,5 @@
-org 0x7E00 ; the address of the sector after the boot sector
+define AFTER_BOOT 0x7E00
+org AFTER_BOOT ; the address of the sector after the boot sector
 
 Main:
 
@@ -21,24 +22,25 @@ Main:
 define ASCII_0 48
 define FIRST_SECTOR 0x7C00
 define COLUMNS 8
-define ROWS 4
+define ROWS 20
 
-    mov si,FIRST_SECTOR
+    mov si,AFTER_BOOT
 
     printloop:
-        mov cl,7          ; set a shifting register
-        lodsb             ; load from what si points to, increment si
-        mov [ByteStorage],al ; put the data into a byte storage so we don't corrupt it
+        mov cl,7               ; set a shifting register
+        lodsb                  ; load from what si points to, increment si
+        mov [ByteStorage],al   ; put the data into a byte storage so we don't corrupt it
 
-    cmp byte [ByteColumn],COLUMNS
-    jne printbit
+        cmp byte [ByteColumn],COLUMNS ; If we've reached the number of columns
+        jne printbit                  ; Just start printing bits
 
-    printbyte:
-        mov al,0xD
+    printbyte:         ; Otherwise gimme a nice newline
+        mov al,0xD     ; nice lil newline
         int 0x10
         mov al,0xA
         int 0x10
-        mov byte [ByteColumn],0
+
+        mov byte [ByteColumn],0  ; Reset the column count
 
     printbit:
         mov al,[ByteStorage]
@@ -55,7 +57,6 @@ define ROWS 4
         jne printbit      ; then print another bit
 
         mov cl,7          ; reset the shifter and mask
-
         mov byte [Mask],128
 
         mov al,0x20       ; print a nice lil space
@@ -65,7 +66,7 @@ define ROWS 4
     ; // printbyte
 
     endloop:
-        cmp si,FIRST_SECTOR+(ROWS*COLUMNS)
+        cmp si,(AFTER_BOOT + (COLUMNS*ROWS))
         jl printloop
 
     EndProg:
@@ -77,4 +78,3 @@ ByteStorage: db 0
 ByteColumn: db 0
 
 TextHelloWorld: db 0xD,0xA,'Welcome to my program!',0xD,0xA,'Displaying myself in binary now...',0xD,0xA,0xD,0xA
-
