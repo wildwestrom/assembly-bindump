@@ -1,7 +1,7 @@
 # Create necessary directories
 
 launch-emulator: assemble
-    qemu-system-x86_64 -drive file=bin/drive.img,index=0,if=floppy,format=raw -boot a
+    cpulimit -l 25 -f -- qemu-system-x86_64 -drive file=bin/drive.img,index=0,if=floppy,format=raw -boot a
 
 assemble:
     mkdir -p bin bin/dest

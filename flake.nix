@@ -24,6 +24,7 @@
             just
             fasm
             qemu
+            limitcpu
           ];
         };
       }
