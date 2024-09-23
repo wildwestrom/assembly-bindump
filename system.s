@@ -19,75 +19,54 @@ Main:
     ; Good, now I want to display a binary representation of myself
 
 define ASCII_0 48
+define FIRST_SECTOR 0x7C00
+define COLUMNS 8
+define ROWS 4
 
-    mov si,0x7DFE
+    mov si,FIRST_SECTOR
+
     printloop:
-        lodsb
-        mov [ByteStorage],al
+        mov cl,7          ; set a shifting register
+        lodsb             ; load from what si points to, increment si
+        mov [ByteStorage],al ; put the data into a byte storage so we don't corrupt it
+
+    cmp byte [ByteColumn],COLUMNS
+    jne printbit
+
     printbyte:
+        mov al,0xD
+        int 0x10
+        mov al,0xA
+        int 0x10
+        mov byte [ByteColumn],0
+
+    printbit:
         mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,7
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,6
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,5
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,4
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,3
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,2
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,1
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        mov al,[ByteStorage]
-        and al,[Mask]
-        shr al,0
-        add al,ASCII_0
-        int 0x10
-        shr byte [Mask],1
-        ;
-        ;
-        mov al,0x20
-        int 0x10
+        and al,[Mask]     ; mask out the most significant bit
+        shr al,cl         ; shift so that we get what we masked
+
+        add al,ASCII_0    ; add it to ASCII 0
+        int 0x10          ; print a 1 or 0
+
+        shr byte [Mask],1 ; shift the mask
+        dec cl            ; subtract the shifter
+
+        cmp cl,-1         ; if we've not reached the last bit
+        jne printbit      ; then print another bit
+
+        mov cl,7          ; reset the shifter and mask
+
         mov byte [Mask],128
+
+        mov al,0x20       ; print a nice lil space
+        int 0x10          
+        inc byte [ByteColumn]
+
+    ; // printbyte
+
     endloop:
-        cmp si,0x7E10
-        jle printloop
+        cmp si,FIRST_SECTOR+(ROWS*COLUMNS)
+        jl printloop
 
     EndProg:
     ret                   ; quit the program
@@ -95,6 +74,7 @@ define ASCII_0 48
 Mask: db 128
 ShiftBy: db 7
 ByteStorage: db 0
+ByteColumn: db 0
 
-TextHelloWorld: db 'Welcome to my program!',0xD,0xA,'Displaying myself in binary now...',0xD,0xA,0xA,0
+TextHelloWorld: db 0xD,0xA,'Welcome to my program!',0xD,0xA,'Displaying myself in binary now...',0xD,0xA,0xD,0xA
 
