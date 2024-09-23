@@ -17,6 +17,9 @@ BootStageOne:
     mov bx,Main ; memory location to load to 
     int 0x13    ; call BIOS interrupt routine
     ;
+    mov al,0x03 ; clear the screen 
+    int 0x10
+    ;
     jmp Main    ; now that it's been loaded
     ;
 
