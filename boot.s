@@ -9,7 +9,7 @@ BootStageOne:
     ;
     ; load the sector from disk using BIOS interrupt 0x13
     mov ah,0x02 ; read sectors into memory
-    mov al,1    ; number of sectors to read
+    mov al,0x08 ; number of sectors to read
     mov dl,0    ; drive number
     mov ch,0    ; cylinder number
     mov dh,0    ; head number
