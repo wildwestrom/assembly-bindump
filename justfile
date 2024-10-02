@@ -26,3 +26,6 @@ assemble:
 
     @echo Append the system to the drive 
     dd if=bin/dest/system of=bin/drive.img bs=512 seek=1 conv=notrunc status=none oflag=append
+
+dump: assemble
+    objdump -b binary -m i386:x86-64 -D bin/drive.img
